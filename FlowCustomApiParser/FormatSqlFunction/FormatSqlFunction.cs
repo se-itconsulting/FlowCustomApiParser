@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using System.IO;
+using System.Collections.Generic;
+using System;
 
 public static class FormatSqlFunction
 {

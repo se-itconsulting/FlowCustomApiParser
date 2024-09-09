@@ -1,8 +1,7 @@
 {
-    "extensions": [
-        {
-            "name": "Microsoft.Azure.WebJobs.Extensions.Http",
-            "typeName": "Microsoft.Azure.WebJobs.Extensions.Http.HttpExtensionConfigProvider, Microsoft.Azure.WebJobs.Extensions.Http, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
-        }
+    "recommendations": [
+      "ms-azuretools.vscode-azurefunctions",
+      "ms-dotnettools.csharp"
     ]
-}
+  }
+  
