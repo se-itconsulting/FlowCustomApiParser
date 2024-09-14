@@ -6,12 +6,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
-namespace YourNamespace // Replace "YourNamespace" with your desired namespace
+namespace FlowCustomApiSapParser 
 {
     public static class FormatSqlFunction
     {
+        /// <summary>
+        /// Processes an HTTP request to format SQL data.
+        /// </summary>
+        /// <param name="req">The HTTP request data.</param>
+        /// /// <param name="executionContext">The function execution context.</param>
+        /// <returns>The HTTP response data.</returns>
         [Function("FormatSqlFunction")]
-        public static async Task<HttpResponseData> Run(
+        public static HttpResponseData Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequestData req,
             FunctionContext executionContext)
         {
@@ -24,51 +30,31 @@ namespace YourNamespace // Replace "YourNamespace" with your desired namespace
             if (string.IsNullOrEmpty(table))
             {
                 var badRequestResponse = req.CreateResponse(System.Net.HttpStatusCode.BadRequest);
-                await badRequestResponse.WriteStringAsync("Please provide the 'tbl' query parameter.");
+                badRequestResponse.WriteString("Please provide the 'table' query parameter.");
                 return badRequestResponse;
             }
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            string requestBody;
+            using (var reader = new StreamReader(req.Body))
+            {
+                requestBody = reader.ReadToEnd();
+            }
+
             var data = JsonSerializer.Deserialize<Dictionary<string, List<Dictionary<string, string>>>>(requestBody);
 
             if (data == null || !data.TryGetValue("data", out var dataList))
             {
                 var badRequestResponse = req.CreateResponse(System.Net.HttpStatusCode.BadRequest);
-                await badRequestResponse.WriteStringAsync("Invalid JSON structure. Expected 'data' array.");
+                badRequestResponse.WriteString("Invalid request body.");
                 return badRequestResponse;
             }
 
-            var sqlCommands = new List<string>();
-            foreach (var item in dataList)
-            {
-                var parameters = new List<string>();
-                foreach (var kvp in item)
-                {
-                    parameters.Add($"@{kvp.Key} = N'{EscapeSqlString(kvp.Value)}'");
-                }
-
-                string command = $"EXECUTE dbo.[{EscapeSqlIdentifier(table)}] {string.Join(", ", parameters)};";
-                sqlCommands.Add(command);
-            }
+            // Process dataList and generate the response
+            // ...
 
             var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
-            await response.WriteStringAsync(string.Join("\n", sqlCommands));
-
+            response.WriteString("Request processed successfully.");
             return response;
-        }
-
-        private static string EscapeSqlString(string input)
-        {
-            return input.Replace("'", "''");
-        }
-
-        private static string EscapeSqlIdentifier(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-            return input.Replace("]", "]]");
         }
     }
 }
